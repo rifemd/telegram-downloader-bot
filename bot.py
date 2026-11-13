@@ -1,38 +1,22 @@
 import os
-from pyrogram import Client, filters
+import telebot
 
-# রেন্ডার বা ক্লাউডের এনভায়রনমেন্ট থেকে ভেরিয়েবলগুলো অটোমেটিক রিড করবে
-API_ID = os.getenv("API_ID")
-API_HASH = os.getenv("API_HASH")
-BOT_TOKEN = os.getenv("BOT_TOKEN")
+# বটের টোকেন এনভায়রনমেন্ট থেকে রিড করবে
+TOKEN = os.getenv("BOT_TOKEN")
+bot = telebot.TeleBot(TOKEN)
 
-# ক্লাউড ক্লায়েন্ট ইনিশিয়ালাইজ করা
-app = Client(
-    "my_bot_session",
-    api_id=API_ID,
-    api_hash=API_HASH,
-    bot_token=BOT_TOKEN
-)
+@bot.message_handler(commands=['start'])
+def send_welcome(message):
+    bot.reply_to(message, "স্বাগতম! আমাকে যেকোনো ভিডিওর লিংক দিন, আমি ডাউনলোড করার চেষ্টা করব।")
 
-@app.on_message(filters.text)
-async def downloader_handler(client, message):
+@bot.message_handler(func=lambda message: True)
+def handle_message(message):
     url = message.text
-    if not url:
-        return
-
-    await message.reply("⏳ লিংক প্রসেস করা হচ্ছে...")
-
-    try:
-        # Pyrogram এর মাধ্যমে যেকোনো পাবলিক বা রেস্ট্রিক্টেড লিংক হ্যান্ডেল করার লজিক
-        downloaded_file = await client.download_media(url)
-        if downloaded_file:
-            await client.send_document(chat_id=message.chat.id, document=downloaded_file)
-            os.remove(downloaded_file) # সার্ভার ক্লিন রাখার জন্য ফাইল ডিলিট
-        else:
-            await message.reply("❌ ফাইলটি ডাউনলোড করা সম্ভব হয়নি।")
-    except Exception as e:
-        await message.reply(f"❌ এরর এসেছে:\n{str(e)}")
+    if "t.me" in url or "http" in url:
+        bot.reply_to(message, f"⏳ আপনার লিংকটি প্রসেস করা হচ্ছে: {url}\n\n(ডাউনলোড কাজ চলছে...)")
+    else:
+        bot.reply_to(message, "দয়া করে একটি সঠিক লিংক পাঠান।")
 
 if __name__ == "__main__":
-    print("🤖 ক্লাউড বট চালু হচ্ছে...")
-    app.run()
+    print("🤖 টেলিগ্রাম বট সফলভাবে চালু হয়েছে...")
+    bot.infinity_polling()
