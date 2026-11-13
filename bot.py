@@ -38,10 +38,15 @@ def download_video(message):
     if os.path.exists(output_template):
         os.remove(output_template)
 
-    ydl_opts = {
+        ydl_opts = {
         'format': 'best[ext=mp4]/best',
         'outtmpl': output_template,
-        'max_filesize': 50 * 1024 * 1024, # ফ্রি সার্ভারের জন্য ৫০ মেগাবাইটের মধ্যে সীমাবদ্ধ রাখা ভালো
+        'max_filesize': 50 * 1024 * 1024,
+        'geo_bypass': True,
+        'nocheckcertificate': True,
+        'http_headers': {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        }
     }
 
     try:
